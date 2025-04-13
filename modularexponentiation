@@ -1,0 +1,12 @@
+auto modexp = [&](long long a, long long b, long long mod, auto && modexp) -> long long {
+            
+            if (a == 1 || b == 0) return 1;
+            if (b == 1) return a;
+
+            long long res = modexp(a, b/2, mod, modexp) % mod;
+
+            res = (1LL * res * res) % mod;
+            if (b & 1) res = (1LL * res * a) % mod;
+
+            return res;
+        };
