@@ -1,0 +1,75 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+const int MOD = 1e9 + 7;
+
+// Mint class for modular arithmetic
+template <int MOD>
+struct mint {
+    int val;
+
+    mint(long long v = 0) {
+        val = int(v % MOD);
+        if (val < 0) val += MOD;
+    }
+
+    // Operators with mint
+    mint operator*(const mint &o) const { return mint(1LL * val * o.val); }
+    mint& operator*=(const mint &o) { val = (*this * o).val; return *this; }
+
+    mint operator+(const mint &o) const { return mint((val + o.val) % MOD); }
+    mint& operator+=(const mint &o) { val = (*this + o).val; return *this; }
+
+    // ✅ Operators with int
+    mint operator*(int x) const { return mint(1LL * val * x); }
+    friend mint operator*(int x, const mint &m) { return m * x; }
+
+    mint operator*(long long x) const { return mint(1LL * val * (x % MOD)); }
+    friend mint operator*(long long x, const mint &m) { return m * x; }
+
+    // Power and inverse
+    mint pow(long long p) const {
+        mint a = *this, res = 1;
+        while (p) {
+            if (p & 1) res *= a;
+            a *= a;
+            p >>= 1;
+        }
+        return res;
+    }
+
+    mint inv() const { return pow(MOD - 2); }
+
+    operator int() const { return val; }
+};
+
+// Factorials class with precomputation and combinations
+template<int mod = MOD>
+struct Factorials {
+    using Mint = mint<mod>;
+    vector<Mint> f, fi;
+
+    Factorials() {}
+    Factorials(int n) {
+        n += 10;
+        f = vector<Mint>(n);
+        fi = vector<Mint>(n);
+        f[0] = 1;
+        for (int i = 1; i < n; i++)
+            f[i] = f[i - 1] * i;
+        fi[n - 1] = f[n - 1].inv();
+        for (int i = n - 1; i > 0; i--)
+            fi[i - 1] = fi[i] * i;
+    }
+
+    Mint C(int n, int k) {
+        if (k < 0 || k > n) return 0;
+        return f[n] * fi[k] * fi[n - k];
+    }
+};
+
+// how to use // first define MOD
+// using Mint = mint<MOD>;
+// Factorials<MOD> fact(n); // will precompute till ' n! '
+// ans += fact.C(depth, i);
+// or fact.f[3] // for only factorial calculation
