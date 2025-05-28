@@ -1,0 +1,49 @@
+// Base splitmix64 hash for integers
+struct CustomHash {
+    static uint64_t splitmix64(uint64_t x) {
+        x += 0x9e3779b97f4a7c15;
+        x = (x ^ (x >> 30)) * 0xbf58476d1ce4e5b9;
+        x = (x ^ (x >> 27)) * 0x94d049bb133111eb;
+        return x ^ (x >> 31);
+    }
+
+    template<typename T>
+    size_t operator()(const T& x) const {
+        return splitmix64(std::hash<T>{}(x));
+    }
+};
+
+// Specialization for pair
+template<typename A, typename B>
+struct PairHash {
+    size_t operator()(const pair<A, B>& p) const {
+        size_t h1 = CustomHash{}(p.first);
+        size_t h2 = CustomHash{}(p.second);
+        return h1 ^ (h2 << 1); // Combine hashes
+    }
+};
+
+// Specialization for vector
+template<typename T>
+struct VectorHash {
+    size_t operator()(const vector<T>& v) const {
+        size_t h = v.size();
+        for (const T& x : v) {
+            h ^= CustomHash{}(x) + 0x9e3779b9 + (h << 6) + (h >> 2);
+        }
+        return h;
+    }
+};
+
+
+// usage:
+/* unordered_set<int, CustomHash> s1;
+unordered_set<pair<int, int>, PairHash<int, int>> s2;
+unordered_set<vector<int>, VectorHash<int>> s3;
+unordered_map<pair<string, int>, int, PairHash<string, int>> m1;
+
+s1.insert(123456);
+s2.insert({10, 20});
+s3.insert({1, 2, 3});
+m1[{"key", 42}] = 100;
+*/
